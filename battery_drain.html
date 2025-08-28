@@ -27,7 +27,7 @@
   <p id="status">Running all systems...</p>
 
   <script>
-    // Canvas animation
+    // 1. Canvas GPU animation
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let x = 0;
@@ -42,8 +42,8 @@
     }
     draw();
 
-    // CPU Worker
-    const worker = new Worker(URL.createObjectURL(new Blob([\`
+    // 2. Web Worker CPU burn
+    const workerCode = `
       onmessage = function () {
         function burn() {
           let x = 2;
@@ -57,17 +57,30 @@
         }
         burn();
       }
-    \`], { type: 'application/javascript' })));
+    `;
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const worker = new Worker(URL.createObjectURL(blob));
     worker.postMessage("start");
 
-    // Mic, Camera, GPS, Sensors
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {});
+    // 3. Microphone
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+      console.log("Mic on");
+    }).catch(() => {});
+
+    // 4. Camera
     navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
       document.getElementById("video").srcObject = stream;
+      console.log("Camera on");
     });
+
+    // 5. GPS
     if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(() => {});
+      navigator.geolocation.watchPosition(pos => {
+        console.log("GPS:", pos.coords);
+      });
     }
+
+    // 6. Sensors
     window.addEventListener("devicemotion", () => {});
     window.addEventListener("deviceorientation", () => {});
   </script>
