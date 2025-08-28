@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🔥 Battery Drain Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Battery Drain Mode ⚡</h1>
+  <canvas id="canvas" width="300" height="300"></canvas>
+  <video id="video" autoplay muted playsinline style="display:none;"></video>
+  <p id="status">Running all systems...</p>
+
+  <script>
+    // Canvas animation
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let x = 0;
+    function draw() {
+      ctx.fillStyle = 'hsl(' + (x % 360) + ', 100%, 50%)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '20px sans-serif';
+      ctx.fillText('Frame ' + x, 10, 30);
+      x++;
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    // CPU Worker
+    const worker = new Worker(URL.createObjectURL(new Blob([\`
+      onmessage = function () {
+        function burn() {
+          let x = 2;
+          while (true) {
+            let isPrime = true;
+            for (let i = 2; i * i <= x; i++) {
+              if (x % i === 0) { isPrime = false; break; }
+            }
+            x++;
+          }
+        }
+        burn();
+      }
+    \`], { type: 'application/javascript' })));
+    worker.postMessage("start");
+
+    // Mic, Camera, GPS, Sensors
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {});
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      document.getElementById("video").srcObject = stream;
+    });
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(() => {});
+    }
+    window.addEventListener("devicemotion", () => {});
+    window.addEventListener("deviceorientation", () => {});
+  </script>
+</body>
+</html>
